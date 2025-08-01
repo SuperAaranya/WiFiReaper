@@ -4,6 +4,7 @@ import os
 import sys
 import re
 
+# Optional imports
 try:
     from colorama import init, Fore, Style
     init()
@@ -40,7 +41,7 @@ def show_header():
   \__/\  / |__|\___  /   |__|         |____|_  /\___  >____  /   __/ \___  >__|   
        \/          \/                        \/     \/     \/|__|        \/       
     """, Fore.LIGHTCYAN_EX))
-    print(c("                WiFiReaper v4.0 - By Aju", Fore.LIGHTGREEN_EX))
+    print(c("                WiFiReaper v4.1 - By Aju", Fore.LIGHTGREEN_EX))
     print(c("                LEGAL Wi-Fi Password & Info Toolkit\n", Fore.LIGHTBLACK_EX))
 
 def check_admin():
@@ -168,11 +169,15 @@ def scan_nearby_networks(export=False):
     except Exception as e:
         print(f"[!] Unexpected error: {str(e)}")
 
-def show_current_wifi():
+def show_current_wifi(export=False):
     slow_print("[*] Getting current Wi-Fi connection details...\n")
     try:
         output = subprocess.check_output("netsh wlan show interfaces", shell=True, stderr=subprocess.DEVNULL).decode(errors="ignore")
         print(output)
+        if export:
+            with open("wifi_current.txt", "w", encoding="utf-8") as f:
+                f.write(output)
+            print(c("[+] Results exported to wifi_current.txt", Fore.LIGHTYELLOW_EX))
     except Exception as e:
         print(f"[!] Error: {str(e)}")
 
@@ -195,23 +200,31 @@ def disconnect_wifi():
     except Exception as e:
         print(f"[!] Error: {str(e)}")
 
-def show_mac_address():
+def show_mac_address(export=False):
     slow_print("[*] Getting MAC address of Wi-Fi adapter...\n")
     try:
         output = subprocess.check_output('getmac /v /fo list', shell=True).decode(errors="ignore")
         print(output)
+        if export:
+            with open("wifi_mac.txt", "w", encoding="utf-8") as f:
+                f.write(output)
+            print(c("[+] Results exported to wifi_mac.txt", Fore.LIGHTYELLOW_EX))
     except Exception as e:
         print(f"[!] Error: {str(e)}")
 
-def show_adapter_info():
+def show_adapter_info(export=False):
     slow_print("[*] Listing all network adapters...\n")
     try:
         output = subprocess.check_output('ipconfig /all', shell=True).decode(errors="ignore")
         print(output)
+        if export:
+            with open("wifi_adapters.txt", "w", encoding="utf-8") as f:
+                f.write(output)
+            print(c("[+] Results exported to wifi_adapters.txt", Fore.LIGHTYELLOW_EX))
     except Exception as e:
         print(f"[!] Error: {str(e)}")
 
-def show_public_ip():
+def show_public_ip(export=False):
     slow_print("[*] Getting your public IP address...\n")
     if requests is None:
         print("[!] Install requests: pip install requests")
@@ -219,6 +232,10 @@ def show_public_ip():
     try:
         ip = requests.get('https://api.ipify.org').text
         print(f"Your public IP address is: {ip}")
+        if export:
+            with open("wifi_public_ip.txt", "w", encoding="utf-8") as f:
+                f.write(ip)
+            print(c("[+] Results exported to wifi_public_ip.txt", Fore.LIGHTYELLOW_EX))
     except Exception as e:
         print(f"[!] Error: {str(e)}")
 
@@ -246,15 +263,16 @@ def show_help():
     print("7. Show all network adapters.")
     print("8. Show your public IP address.")
     print("9. Ping a website or IP address.")
-    print("10. Help: Show this help menu.")
-    print("11. About: Show info about this tool.")
+    print("10. Export results to text files for offline analysis.")
+    print("11. Help: Show this help menu.")
+    print("12. About: Show info about this tool.")
     print("0. Exit: Quit the program.")
     input("\nPress Enter to return to the menu...")
 
 def show_info():
     clear()
     show_header()
-    slow_print("About WiFiReaper v4.0")
+    slow_print("About WiFiReaper v4.1")
     print("\nThis tool helps you:")
     print("• Grab all saved Wi-Fi passwords on your computer")
     print("• Scan for all nearby wireless networks (saved or not)")
@@ -264,6 +282,7 @@ def show_info():
     print("• Show all network adapters")
     print("• Show your public IP address")
     print("• Ping a website or IP address")
+    print("• Export results to text files")
     print("• Learn about network security")
     print("\nNote: This tool only works on Windows systems")
     print("For best results, run as administrator")
@@ -284,11 +303,12 @@ def main():
         print("7. Show all network adapters")
         print("8. Show your public IP address")
         print("9. Ping a website or IP address")
-        print("10. Help")
-        print("11. About this tool")
+        print("10. Export results to text files")
+        print("11. Help")
+        print("12. About this tool")
         print("0. Exit")
         try:
-            choice = input("\nEnter your choice (0-11): ").strip()
+            choice = input("\nEnter your choice (0-12): ").strip()
             if choice == "1":
                 clear(); show_header(); grab_wifi_passwords()
             elif choice == "2":
@@ -308,14 +328,38 @@ def main():
             elif choice == "9":
                 clear(); show_header(); ping_target()
             elif choice == "10":
-                show_help()
+                clear(); show_header()
+                print("Which result would you like to export?")
+                print("1. Saved Wi-Fi passwords")
+                print("2. Nearby Wi-Fi networks")
+                print("3. Current Wi-Fi connection")
+                print("4. MAC address")
+                print("5. Network adapters")
+                print("6. Public IP address")
+                subchoice = input("\nEnter your choice (1-6): ").strip()
+                if subchoice == "1":
+                    grab_wifi_passwords(export=True)
+                elif subchoice == "2":
+                    scan_nearby_networks(export=True)
+                elif subchoice == "3":
+                    show_current_wifi(export=True)
+                elif subchoice == "4":
+                    show_mac_address(export=True)
+                elif subchoice == "5":
+                    show_adapter_info(export=True)
+                elif subchoice == "6":
+                    show_public_ip(export=True)
+                else:
+                    slow_print("\n[!] Invalid export choice. Returning to main menu.")
             elif choice == "11":
+                show_help()
+            elif choice == "12":
                 show_info()
             elif choice == "0":
                 slow_print("\nExiting WiFiReaper...")
                 break
             else:
-                slow_print("\n[!] Invalid choice. Please select 0-11.")
+                slow_print("\n[!] Invalid choice. Please select 0-12.")
             input("\nPress Enter to continue...")
         except KeyboardInterrupt:
             slow_print("\n\nExiting...")
