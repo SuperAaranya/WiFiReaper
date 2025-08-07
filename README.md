@@ -13,3 +13,7 @@ WiFi Reaper is a **Windows-native C# tool** that displays saved Wi-Fi passwords 
 ## How to Run
 1. Open with Visual Studio or run with `dotnet run`
 2. Or compile using: `dotnet publish -c Release -r win-x64 --self-contained false -o ./Build`
+3. Run `WiFiReaper.exe` from the Build folder (as Admin for full features)
+
+## License
+MIT – see `LICENSE` file
